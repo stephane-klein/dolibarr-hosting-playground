@@ -30,6 +30,7 @@ services:
       WWW_USER_ID: 1000
       WWW_GROUP_ID: 1000
     volumes:
+      - ./volumes/conf/:/var/www/html/conf/
       - ./volumes/documents/:/var/www/documents
       - ./volumes/customs/:/var/www/html/custom
     ports:
