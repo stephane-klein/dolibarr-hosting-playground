@@ -1,0 +1,47 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: dolibarr
+      POSTGRES_USER: dolibarr
+      POSTGRES_PASSWORD: password
+    volumes:
+      - ./volumes/postgres/:/var/lib/postgresql/
+    healthcheck:
+      test: ["CMD", "sh", "-c", "pg_isready -U $$POSTGRES_USER -h $$(hostname -i)"]
+      interval: 10s
+      start_period: 30s
+
+  dolibarr:
+    # https://github.com/tuxgasy/docker-dolibarr
+    image: tuxgasy/dolibarr:17.0.3
+    environment:
+      DOLI_DB_TYPE: "pgsql"
+      DOLI_DB_HOST: "postgres"
+      DOLI_DB_HOST_PORT: "5432"
+      DOLI_DB_USER: "dolibarr"
+      DOLI_DB_PASSWORD: "password"
+      DOLI_DB_NAME: "dolibarr"
+      DOLI_ADMIN_LOGIN: "admin"
+      DOLI_ADMIN_PASSWORD: "password"
+      DOLI_URL_ROOT: 'http://0.0.0.0'
+      PHP_INI_DATE_TIMEZONE: 'Europe/Paris'
+      WWW_USER_ID: 1000
+      WWW_GROUP_ID: 1000
+    volumes:
+      - ./volumes/documents/:/var/www/documents
+      - ./volumes/customs/:/var/www/html/custom
+    ports:
+      - "80:80"
+      - "9000:9000"
+    depends_on:
+      - postgres
+      - mail
+
+  mail:
+    image: maildev/maildev
+    ports:
+      - "8081:80"
+      - "25:25"
+
